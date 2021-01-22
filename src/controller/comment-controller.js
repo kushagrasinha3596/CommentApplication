@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import Comment from '../component/comment-component';
-import DataModel from '../common/comment-data-model';
+import CommentDataModel from '../common/comment-data-model';
+import Post from '../component/post-component';
 
 class CommentBox extends Component{
 
@@ -9,21 +10,32 @@ class CommentBox extends Component{
 
         //declaraing state
         this.state = {
-            comments: [{
-                defaultText: 'Comment...',
-                text: '',
-                likes: 0,
-                dislikes: 0,
-                replies: []
-            }]
+            comments: []
         }
-        this.addComment = this.addComment.bind(this);
+        this.addCommentBox = this.addCommentBox.bind(this);
         this.addReply = this.addReply.bind(this);
         this.addLikes = this.addLikes.bind(this);
         this.addDislikes = this.addDislikes.bind(this);
     }
 
-    addComment = (event) => {
+    addCommentBox = (commentId) => {
+        let newCommentDataModel = CommentDataModel;
+        if(newCommentDataModel && commentId){
+            newCommentDataModel['id'] = commentId;
+            this.setState((currState) => {
+                currState.comments.push(newCommentDataModel);
+                return currState;
+            });
+        }
+    }
+
+    addCommentContent = (event, commentId) => {
+        let currentCommentObj = this.state.comments.find((commentObj) => {
+            return commentObj['id'] === commentId;
+        });
+        if(currentCommentObj){
+            currentCommentObj['text'] = event.target.value;
+        }
     }
 
     addReply = (event) => {
@@ -40,25 +52,36 @@ class CommentBox extends Component{
 
     render(){
         return (
-            <React.Fragment>
+            <div style={{
+                height: 'auto',
+                width: '25%',
+                border: '2px dashed black',
+                padding: '1%',
+                position: 'absolute',
+                left: '50%',
+                transform: 'translate(-50%, 0%)'
+            }}>
+
+                <Post addCommentBox={this.addCommentBox}></Post>
                 {
                     this.state.comments.length ? (
                         this.state.comments.map((commentObj, commentIndex) => {
                             return (
                                 <Comment
                                     key={Math.random()*commentIndex}
+                                    id={commentObj.id}
                                     defaultText={commentObj.defaultText}
                                     text={commentObj.text}
                                     likes={commentObj.likes}
                                     dislikes={commentObj.dislikes}
                                     replies={commentObj.replies}
-                                    addComment={this.addComment}
+                                    addCommentContent={this.addCommentContent}
                                 ></Comment>
                             )
                         })
                     ) : null
                 }
-            </React.Fragment>
+            </div>
         )
     }
 }
